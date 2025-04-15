@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+from io import BytesIO
 from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 
@@ -47,16 +48,19 @@ def obtener_precio_actual(isin):
     except:
         return None
 
-# Carga automática del archivo Excel
-archivo_path = "fondos.xlsx"
+# Enlace de Google Drive (enlace directo de descarga)
+url = 'https://drive.google.com/uc?export=download&id=1DID_ABC12345'  # Cambia este ID por el tuyo
 
-try:
-    df = pd.read_excel(archivo_path, engine="openpyxl")
-except FileNotFoundError:
-    st.error(f"❌ No se encontró el archivo {archivo_path}. Asegurate de tenerlo en la misma carpeta que este script.")
-    st.stop()
-except Exception as e:
-    st.error(f"⚠️ Hubo un problema al leer el archivo: {e}")
+# Descargar el archivo Excel desde Google Drive
+response = requests.get(url)
+
+# Verificar si la descarga fue exitosa
+if response.status_code == 200:
+    # Usar BytesIO para leer el archivo Excel desde la respuesta
+    df = pd.read_excel(BytesIO(response.content), engine="openpyxl")
+    st.write("¡Archivo cargado correctamente!")
+else:
+    st.error("Hubo un problema al descargar el archivo desde Google Drive.")
     st.stop()
 
 # Procesamiento de fechas

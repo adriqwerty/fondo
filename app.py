@@ -49,7 +49,7 @@ def obtener_precio_actual(isin):
         return None
 
 # Enlace de Google Drive (enlace directo de descarga)
-url = 'https://drive.google.com/uc?export=download&id=1DID_ABC12345'  # Cambia este ID por el tuyo
+url = 'https://docs.google.com/spreadsheets/d/18zva1x4v5UCxamu9qbV97EVA6DbZAOzb/edit?usp=sharing&ouid=113200886298592458980&rtpof=true&sd=true'  # Cambia este ID por el tuyo
 
 # Descargar el archivo Excel desde Google Drive
 response = requests.get(url)

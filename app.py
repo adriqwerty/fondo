@@ -107,9 +107,13 @@ if precio_actual:
     datos['Rendimiento (%)'] = ((precio_actual - datos['Valor Compra']) / datos['Valor Compra']) * 100
     # Redondear a 2 decimales
     datos['Rendimiento (%)'] = datos['Rendimiento (%)'].round(2)
+    
+    # Calcular el valor actual de cada aportación
+    datos['Valor Actual'] = (datos['Dinero Inv.'] / datos['Valor Compra']) * precio_actual
 else:
     datos['Estimación Acumulada'] = None
     datos['Rendimiento (%)'] = None
+    datos['Valor Actual'] = None
 
 # Función de color condicional para el rendimiento
 def color_rendimiento(val):
@@ -124,11 +128,12 @@ def color_rendimiento(val):
 # Redondear la columna de rendimiento a 2 decimales y formatear la tabla
 datos['Rendimiento (%)'] = datos['Rendimiento (%)'].apply(lambda x: f'{x:.2f}' if pd.notnull(x) else x)
 
-# Formatear 'Valor Compra' para mostrar dos decimales, pero sin cambiar su tipo
+# Formatear 'Valor Compra' y 'Valor Actual' para mostrar dos decimales, pero sin cambiar su tipo
 datos['Valor Compra'] = datos['Valor Compra'].apply(lambda x: f"{x:.2f}")
+datos['Valor Actual'] = datos['Valor Actual'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else x)
 
-# Mostrar la tabla con los valores redondeados, color condicional y centrado
-st.dataframe(datos[['Fecha', 'Dinero Inv.', 'Valor Compra', 'Rendimiento (%)']].style.applymap(color_rendimiento, subset=['Rendimiento (%)']).set_properties(**{'text-align': 'center'}), use_container_width=True, height=300, hide_index=True)
+# Reordenar las columnas para que 'Valor Compra' salga antes que 'Dinero Inv.'
+st.dataframe(datos[['Fecha', 'Valor Compra', 'Dinero Inv.', 'Valor Actual', 'Rendimiento (%)']].style.applymap(color_rendimiento, subset=['Rendimiento (%)']).set_properties(**{'text-align': 'center'}), use_container_width=True, height=300, hide_index=True)
 
 # Asegurar que 'Valor Compra' sea numérico (por si fue formateado como string)
 datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')

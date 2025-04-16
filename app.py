@@ -188,10 +188,21 @@ if precio_actual:
 
     st.plotly_chart(fig2, use_container_width=True)
 
-    col1, col2 = st.columns(2)
+    total_invertido = datos['Dinero Inv.'].sum()
+    valor_estimado_total = datos['Valor Actual Estimado'].sum()
+
+    total_invertido = datos['Dinero Inv.'].sum()
+    valor_estimado_total = datos['Valor Actual Estimado'].sum()
+
+    # Calcular el precio medio de compra ponderado
+    precio_medio_compra = (datos['Valor Compra'] * datos['Dinero Inv.']).sum() / total_invertido
+
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("💶 Precio actual", f"{precio_actual:.2f} €")
     with col2:
-        st.metric("📌 Valor estimado", f"{datos['Valor Actual Estimado'].iloc[-1]:.2f} €")
-else:
-    st.warning("⚠️ No se pudo obtener el precio actual de este fondo.")
+        st.metric("📊 Precio medio compra", f"{precio_medio_compra:.2f} €")
+    with col3:
+        st.metric("📥 Total aportado", f"{total_invertido:.2f} €")
+    with col4:
+        st.metric("📌 Valor estimado", f"{valor_estimado_total:.2f} €")

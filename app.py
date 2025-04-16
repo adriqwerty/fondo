@@ -142,19 +142,22 @@ datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
 datos['Fecha_dt'] = pd.to_datetime(datos['Fecha'], format='%d/%m/%Y')
 datos.sort_values('Fecha_dt', inplace=True)
 
-# Gráfico de valor de compra
+# Título de la sección del primer gráfico
 st.subheader("📈 Evolución del valor de compra")
+
+# Gráfico de valor de compra
 fig1 = go.Figure()
 fig1.add_trace(go.Scatter(
     x=datos['Fecha_dt'], y=datos['Valor Compra'],
     mode='lines+markers', name='Valor Compra', line=dict(color='teal')
 ))
 fig1.update_layout(
-    title=f"Valor de Compra - {fondo_seleccionado}",
     xaxis_title="Fecha",
     yaxis_title="Valor",
     template="plotly_white",
-    yaxis=dict(tickformat=".2f")  # Formato del eje Y con 2 decimales
+    yaxis=dict(tickformat=".2f"),  # Formato del eje Y con 2 decimales
+    height=500,  # Aumentar el tamaño del gráfico
+    width=1000  # Aumentar el tamaño del gráfico
 )
 st.plotly_chart(fig1, use_container_width=True)
 
@@ -185,16 +188,19 @@ if precio_actual:
 
     fig2.update_layout(
         barmode='group',  # Barras superpuestas
-        title=f"Inversión vs Estimación - {fondo_seleccionado}",
         xaxis_title="Fecha", yaxis_title="Euros", template="plotly_white",
         xaxis=dict(showgrid=True), yaxis=dict(showgrid=True),
-        plot_bgcolor="rgba(245, 247, 250, 1)"
+        plot_bgcolor="rgba(245, 247, 250, 1)",
+        height=500,  # Aumentar el tamaño del gráfico
+        width=1000,  # Aumentar el tamaño del gráfico
+        legend=dict(
+            orientation="h",  # Establecer la orientación horizontal
+            yanchor="bottom",  # Posicionar la leyenda debajo del gráfico
+            y=-0.2  # Colocar la leyenda un poco debajo
+        )
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-
-    total_invertido = datos['Dinero Inv.'].sum()
-    valor_estimado_total = datos['Valor Actual Estimado'].sum()
 
     total_invertido = datos['Dinero Inv.'].sum()
     valor_estimado_total = datos['Valor Actual Estimado'].sum()

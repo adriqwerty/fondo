@@ -80,15 +80,6 @@ datos.sort_values('Fecha', ascending=False, inplace=True)
 # Formatear la columna 'Fecha' a un formato legible
 datos['Fecha'] = datos['Fecha'].dt.strftime('%d/%m/%Y')
 
-# Mostrar tabla con solo las columnas deseadas
-st.subheader("🔍 Vista previa de los datos del fondo seleccionado")
-
-# Asegúrate de que 'Valor Compra' esté en formato numérico antes de las operaciones
-datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
-
-# Eliminar columna redundante "Fecha Formateada" y renombrar
-datos = datos.drop(columns=["Fecha Formateada"])
-
 # Asignar ISIN
 isin_map = {
     "MSCI World": "IE00BYX5NX33",
@@ -118,6 +109,33 @@ else:
 # Llenar los NaN o None antes de mostrar
 datos['Valor Actual'] = datos['Valor Actual'].fillna('-')
 datos['Rendimiento (%)'] = datos['Rendimiento (%)'].fillna('-')
+
+# Calcular el precio medio de compra ponderado
+total_invertido = datos['Dinero Inv.'].sum()
+valor_estimado_total = datos['Valor Actual Estimado'].sum()
+
+# Calcular el precio medio de compra ponderado
+precio_medio_compra = (datos['Valor Compra'] * datos['Dinero Inv.']).sum() / total_invertido
+
+# Crear columnas de métricas
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric("💶 Precio actual", f"{precio_actual:.2f} €")
+with col2:
+    st.metric("📊 Precio medio compra", f"{precio_medio_compra:.2f} €")
+with col3:
+    st.metric("📥 Total aportado", f"{total_invertido:.2f} €")
+with col4:
+    st.metric("📌 Valor estimado", f"{valor_estimado_total:.2f} €")
+
+# Mostrar tabla con solo las columnas deseadas
+st.subheader("🔍 Datos del fondo seleccionado")
+
+# Asegúrate de que 'Valor Compra' esté en formato numérico antes de las operaciones
+datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
+
+# Eliminar columna redundante "Fecha Formateada" y renombrar
+datos = datos.drop(columns=["Fecha Formateada"])
 
 # Función para colorear el rendimiento
 def color_rendimiento(val):
@@ -216,19 +234,3 @@ if precio_actual:
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-
-    total_invertido = datos['Dinero Inv.'].sum()
-    valor_estimado_total = datos['Valor Actual Estimado'].sum()
-
-    # Calcular el precio medio de compra ponderado
-    precio_medio_compra = (datos['Valor Compra'] * datos['Dinero Inv.']).sum() / total_invertido
-
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("💶 Precio actual", f"{precio_actual:.2f} €")
-    with col2:
-        st.metric("📊 Precio medio compra", f"{precio_medio_compra:.2f} €")
-    with col3:
-        st.metric("📥 Total aportado", f"{total_invertido:.2f} €")
-    with col4:
-        st.metric("📌 Valor estimado", f"{valor_estimado_total:.2f} €")

@@ -28,6 +28,7 @@ Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con es
 """)
 
 # Función para buscar precio actual según ISIN
+@st.cache_data(show_spinner=False)
 def obtener_precio_actual(isin):
     try:
         if isin == "IE00BYX5NX33":
@@ -48,17 +49,22 @@ def obtener_precio_actual(isin):
     except:
         return None
 
+# Función para cargar datos
+@st.cache_data(show_spinner=False)
+def cargar_datos(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return pd.read_excel(BytesIO(response.content), engine="openpyxl")
+    else:
+        return None
+
 # Enlace de Google Drive (enlace directo de descarga)
 url = 'https://drive.google.com/uc?export=download&id=18zva1x4v5UCxamu9qbV97EVA6DbZAOzb'  # Cambia este ID por el tuyo
 
-# Descargar el archivo Excel desde Google Drive
-response = requests.get(url)
-
-# Verificar si la descarga fue exitosa
-if response.status_code == 200:
-    # Usar BytesIO para leer el archivo Excel desde la respuesta
-    df = pd.read_excel(BytesIO(response.content), engine="openpyxl")
-    st.write("¡Archivo cargado correctamente!")
+# Descargar el archivo Excel
+df = cargar_datos(url)
+if df is not None:
+    st.success("¡Archivo cargado correctamente!")
 else:
     st.error("Hubo un problema al descargar el archivo desde Google Drive.")
     st.stop()
@@ -74,20 +80,11 @@ fondo_seleccionado = st.selectbox("🎯 Seleccioná un fondo", fondos_disponible
 # Filtrar datos por fondo
 datos = df[df['Fondo'] == fondo_seleccionado].copy()
 
-# Ordenar los datos por fecha de más reciente a más antigua (se cambió ascending=False)
+# Ordenar los datos por fecha descendente
 datos.sort_values('Fecha', ascending=False, inplace=True)
 
-# Formatear la columna 'Fecha' a un formato legible
-datos['Fecha'] = datos['Fecha'].dt.strftime('%d/%m/%Y')
-
-# Mostrar tabla con solo las columnas deseadas
-st.subheader("🔍 Vista previa de los datos del fondo seleccionado")
-
-# Asegúrate de que 'Valor Compra' esté en formato numérico antes de las operaciones
+# Asegurar que 'Valor Compra' esté en formato numérico
 datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
-
-# Eliminar columna redundante "Fecha Formateada" y renombrar
-datos = datos.drop(columns=["Fecha Formateada"])
 
 # Asignar ISIN
 isin_map = {
@@ -103,43 +100,44 @@ if precio_actual:
     datos['Valor Actual Estimado'] = datos['Dinero Inv.'] / datos['Valor Compra'] * precio_actual
     datos['Estimación Acumulada'] = datos['Valor Actual Estimado'].cumsum()
 
-    # Calcular el rendimiento comparado con el precio actual
     datos['Rendimiento (%)'] = ((precio_actual - datos['Valor Compra']) / datos['Valor Compra']) * 100
-    # Redondear a 2 decimales
     datos['Rendimiento (%)'] = datos['Rendimiento (%)'].round(2)
-    
-    # Calcular el valor actual de cada aportación
+
     datos['Valor Actual'] = (datos['Dinero Inv.'] / datos['Valor Compra']) * precio_actual
 else:
     datos['Estimación Acumulada'] = None
     datos['Rendimiento (%)'] = None
     datos['Valor Actual'] = None
 
-# Función de color condicional para el rendimiento
+# Función de color condicional
 def color_rendimiento(val):
     try:
-        # Convertir el valor a float para evitar errores de tipo
         val = float(val)
         color = 'green' if val > 0 else 'red'
         return f'color: {color}'
-    except ValueError:
-        return 'color: black'  # Si no es un número, mostrar en negro
+    except:
+        return 'color: black'
 
-# Redondear la columna de rendimiento a 2 decimales y formatear la tabla
-datos['Rendimiento (%)'] = datos['Rendimiento (%)'].apply(lambda x: f'{x:.2f}' if pd.notnull(x) else x)
+# Mostrar tabla
+st.subheader("🔍 Vista previa de los datos del fondo seleccionado")
 
-# Formatear 'Valor Compra' y 'Valor Actual' para mostrar dos decimales, pero sin cambiar su tipo
-datos['Valor Compra'] = datos['Valor Compra'].apply(lambda x: f"{x:.2f}")
-datos['Valor Actual'] = datos['Valor Actual'].apply(lambda x: f"{x:.2f}" if pd.notnull(x) else x)
+st.dataframe(
+    datos[['Fecha Formateada', 'Valor Compra', 'Dinero Inv.', 'Valor Actual', 'Rendimiento (%)']].style
+        .applymap(color_rendimiento, subset=['Rendimiento (%)'])
+        .format({
+            'Valor Compra': "{:.2f}",
+            'Dinero Inv.': "{:.2f}",
+            'Valor Actual': "{:.2f}",
+            'Rendimiento (%)': "{:.2f}"
+        })
+        .set_properties(**{'text-align': 'center'}),
+    use_container_width=True,
+    height=300,
+    hide_index=True
+)
 
-# Reordenar las columnas para que 'Valor Compra' salga antes que 'Dinero Inv.'
-st.dataframe(datos[['Fecha', 'Valor Compra', 'Dinero Inv.', 'Valor Actual', 'Rendimiento (%)']].style.applymap(color_rendimiento, subset=['Rendimiento (%)']).set_properties(**{'text-align': 'center'}), use_container_width=True, height=300, hide_index=True)
-
-# Asegurar que 'Valor Compra' sea numérico (por si fue formateado como string)
-datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
-
-# Crear una columna de fechas reales para ordenar y graficar correctamente
-datos['Fecha_dt'] = pd.to_datetime(datos['Fecha'], format='%d/%m/%Y')
+# Preparar datos para gráficas
+datos['Fecha_dt'] = datos['Fecha']
 datos.sort_values('Fecha_dt', inplace=True)
 
 # Título de la sección del primer gráfico
@@ -155,48 +153,40 @@ fig1.update_layout(
     xaxis_title="Fecha",
     yaxis_title="Valor",
     template="plotly_white",
-    yaxis=dict(tickformat=".2f"),  # Formato del eje Y con 2 decimales
-    height=500,  # Aumentar el tamaño del gráfico
-    width=1000  # Aumentar el tamaño del gráfico
+    yaxis=dict(tickformat=".2f"),
+    height=500,
+    width=1000
 )
 st.plotly_chart(fig1, use_container_width=True)
 
-# Asegurarse de que la columna 'Fecha' esté en formato datetime antes de ordenar
-datos['Fecha'] = pd.to_datetime(datos['Fecha'], format='%d/%m/%Y')
-
-# Ordenar los datos por fecha de la más antigua a la más reciente
-datos = datos.sort_values('Fecha')
-
-# Gráfico comparativo de barras superpuestas sin acumulación
+# Gráfico comparativo
 if precio_actual:
     st.subheader("💰 Inversión vs Estimación por Fecha")
     fig2 = go.Figure()
 
-    # Total invertido (sin acumulación)
     fig2.add_trace(go.Bar(
-        x=datos['Fecha'], y=datos['Dinero Inv.'], 
-        name="Total Invertido", 
+        x=datos['Fecha_dt'], y=datos['Dinero Inv.'],
+        name="Total Invertido",
         marker=dict(color="#2c3e50")
     ))
 
-    # Estimación acumulada (sin acumulación)
     fig2.add_trace(go.Bar(
-        x=datos['Fecha'], y=datos['Valor Actual Estimado'], 
-        name="Valor Estimado Actual", 
+        x=datos['Fecha_dt'], y=datos['Valor Actual Estimado'],
+        name="Valor Estimado Actual",
         marker=dict(color="#27ae60")
     ))
 
     fig2.update_layout(
-        barmode='group',  # Barras superpuestas
-        xaxis_title="Fecha", yaxis_title="Euros", template="plotly_white",
-        xaxis=dict(showgrid=True), yaxis=dict(showgrid=True),
+        barmode='group',
+        xaxis_title="Fecha", yaxis_title="Euros",
+        template="plotly_white",
         plot_bgcolor="rgba(245, 247, 250, 1)",
-        height=500,  # Aumentar el tamaño del gráfico
-        width=1000,  # Aumentar el tamaño del gráfico
+        height=500,
+        width=1000,
         legend=dict(
-            orientation="h",  # Establecer la orientación horizontal
-            yanchor="bottom",  # Posicionar la leyenda debajo del gráfico
-            y=-0.2  # Colocar la leyenda un poco debajo
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2
         )
     )
 

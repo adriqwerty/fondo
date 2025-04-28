@@ -25,7 +25,7 @@ st.markdown("""
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 36px;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 20px;'>Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.</h1>", unsafe_allow_html=True)
 
-# Función para buscar precio actual según ISIN
+# Función para obtener el precio actual según ISIN
 def obtener_precio_actual(isin):
     try:
         if isin == "IE00BYX5NX33":
@@ -135,6 +135,15 @@ datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'], errors='coerce')
 # Eliminar columna redundante "Fecha Formateada" y renombrar
 datos = datos.drop(columns=["Fecha Formateada"])
 
+# Función para formatear los valores con símbolo de euro y porcentaje
+def formato_decimal_con_simbolos(x, tipo='euro'):
+    if isinstance(x, (int, float)):
+        if tipo == 'euro':
+            return f"{x:.2f} €"  # El símbolo del euro va al final
+        elif tipo == 'porcentaje':
+            return f"{x:.2f} %"  # El símbolo de porcentaje va al final
+    return x
+
 # Función para colorear el rendimiento
 def color_rendimiento(val):
     try:
@@ -156,9 +165,21 @@ columnas_mostrar = ['Fecha', 'Valor Compra', 'Dinero Inv.', 'Valor Actual', 'Ren
 if datos['Rendimiento (%)'].ne('-').any():
     styled_df = datos[columnas_mostrar].style \
         .applymap(color_rendimiento, subset=['Rendimiento (%)']) \
+        .format({
+            'Valor Compra': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Dinero Inv.': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Valor Actual': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Rendimiento (%)': lambda x: formato_decimal_con_simbolos(x, tipo='porcentaje'),
+        }) \
         .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
 else:
     styled_df = datos[columnas_mostrar].style \
+        .format({
+            'Valor Compra': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Dinero Inv.': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Valor Actual': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+            'Rendimiento (%)': lambda x: formato_decimal_con_simbolos(x, tipo='porcentaje'),
+        }) \
         .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
 
 # Mostrar en Streamlit

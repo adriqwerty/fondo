@@ -22,7 +22,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("💼 Evolución de Fondos de Inversión")
+st.title("💼 Evolución de la Inversión")
 st.markdown("""
 Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.
 """)

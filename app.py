@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión", layout="centered")
+st.set_page_config(page_title="Fondos de Inversión", layout="wide")
 st.markdown("""
     <style>
     .main {
@@ -22,10 +22,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("💼 Evolución de la Inversión")
-st.markdown("""
-Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.
-""")
+st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 36px;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 20px;'>Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.</h1>", unsafe_allow_html=True)
 
 # Función para buscar precio actual según ISIN
 def obtener_precio_actual(isin):
@@ -69,7 +67,7 @@ df['Fecha Formateada'] = df['Fecha'].dt.strftime("%d/%m/%Y")
 
 # Fondos disponibles
 fondos_disponibles = df['Fondo'].unique()
-fondo_seleccionado = st.selectbox("🎯 Seleccioná un fondo", fondos_disponibles)
+fondo_seleccionado = st.selectbox("🎯 Seleccionar un fondo", fondos_disponibles)
 
 # Filtrar datos por fondo
 datos = df[df['Fondo'] == fondo_seleccionado].copy()

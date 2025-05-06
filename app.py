@@ -1,58 +1,65 @@
 import streamlit as st
 import pandas as pd
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from bs4 import BeautifulSoup
 import requests
-from datetime import datetime
+from io import BytesIO
+from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 
 # Configuración de página
 st.set_page_config(page_title="Fondos de Inversión", layout="wide")
-
 st.markdown("""
     <style>
-    .main { background-color: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
-    .block-container { padding-top: 2rem; }
-    h1, h2, h3 { color: #2c3e50; }
+    .main {
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .block-container {
+        padding-top: 2rem;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 36px;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 20px;'>Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.</h1>", unsafe_allow_html=True)
 
-# Autenticación con Google Sheets
-SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-CREDS = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", SCOPE)
-client = gspread.authorize(CREDS)
-
-# Hoja de cálculo
-SPREADSHEET_ID = "17di9PxOKP3ONBeHlq9GO02ftc87j4_umuxCUdvoz5KU"
-SHEET_NAME = "Hoja1"
-sheet = client.open_by_key(SPREADSHEET_ID).worksheet(SHEET_NAME)
-
-# Función para obtener precio actual por ISIN
+# Función para obtener el precio actual según ISIN
 def obtener_precio_actual(isin):
     try:
         if isin == "IE00BYX5NX33":
-            url = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
         elif isin == "LU1213836080":
-            url = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
         else:
             return None
-        html = requests.get(url).text
-        soup = BeautifulSoup(html, 'lxml')
-        td = soup.find('td', class_='line text')
-        if td:
-            valor = str(td)[26:31].replace(",", ".")
+
+        result = requests.get(website)
+        content = result.text
+        soup = BeautifulSoup(content, 'lxml')
+        box = soup.find('td', class_='line text')
+        if box:
+            valor = str(box)[26:31].replace(",", ".")
             return round(float(valor), 2)
+        return None
     except:
         return None
-    return None
 
-# Cargar datos
-data = sheet.get_all_records()
-df = pd.DataFrame(data)
-df['Fecha'] = pd.to_datetime(df['Fecha'], dayfirst=True, errors='coerce')
+# Enlace de Google Drive (enlace directo de descarga)
+url = 'https://drive.google.com/uc?export=download&id=18zva1x4v5UCxamu9qbV97EVA6DbZAOzb'  # Cambia este ID por el tuyo
+
+# Descargar el archivo Excel desde Google Drive
+response = requests.get(url)
+
+# Verificar si la descarga fue exitosa
+if response.status_code == 200:
+    # Usar BytesIO para leer el archivo Excel desde la respuesta
+    df = pd.read_excel(BytesIO(response.content), engine="openpyxl")
+    st.write("¡Archivo cargado correctamente!")
+else:
+    st.error("Hubo un problema al descargar el archivo desde Google Drive.")
+    st.stop()
 
 # Procesamiento de fechas
 df['Fecha'] = pd.to_datetime(df['Fecha'])
@@ -78,8 +85,7 @@ isin_map = {
 }
 isin = isin_map.get(fondo_seleccionado.strip(), None)
 precio_actual = obtener_precio_actual(isin) if isin else None
-datos['Dinero Inv.'] = pd.to_numeric(datos['Dinero Inv.'].astype(str).str.replace(',', '.'), errors='coerce')
-datos['Valor Compra'] = pd.to_numeric(datos['Valor Compra'].astype(str).str.replace(',', '.'), errors='coerce')
+
 # Cálculo de rendimiento
 datos['Total Invertido'] = datos['Dinero Inv.'].cumsum()
 if precio_actual:
@@ -247,28 +253,4 @@ if precio_actual:
     )
 
     st.plotly_chart(fig2, use_container_width=True)
-# Formulario para agregar datos
-with st.form("nuevo_registro"):
-    st.subheader("➕ Añadir nueva inversión")
-    col1, col2, col3, co14 = st.columns(4)
-    with col1:
-        fecha = st.date_input("Fecha", value=datetime.today())
-    with col2:
-        importe = st.number_input("Dinero Invertido (€)", min_value=0.0, step=100.0)
-    with col3:
-        valor_compra = st.number_input("Valor Compra (€)", min_value=0.0, step=100.0)    
-    with co14:
-        fondo_sel = st.selectbox("Fondo", ["MSCI World", "Global Technology"])
 
-    enviado = st.form_submit_button("Guardar")
-
-    if enviado:
-        nueva_fila = [
-        fecha.strftime("%d/%m/%Y"),
-        str(importe).replace(",", "."),
-        str(valor_compra).replace(",", "."),
-        fondo_sel
-        ]
-        sheet.append_row(nueva_fila)
-        st.success("✅ Registro añadido correctamente. Recarga la página para verlo actualizado.")
-        st.stop()

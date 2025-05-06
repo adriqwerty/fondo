@@ -6,3 +6,4 @@ lxml
 openpyxl
 plotly
 gspread
+oauth2client

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión", layout="wide")
+st.set_page_config(page_title="Fondos de Inversión2", layout="wide")
 st.markdown("""
     <style>
     .main {

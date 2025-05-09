@@ -47,6 +47,45 @@ def obtener_precio_actual(isin):
     except:
         return None
 
+def obtener_fecha_actual(isin):
+    try:
+        if isin == "IE00BYX5NX33":
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
+        elif isin == "LU1213836080":
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
+        else:
+            return None
+
+        result = requests.get(website)
+        content = result.text
+        soup = BeautifulSoup(content, 'lxml')
+        box = soup.find('td', class_='line text')
+        if box:
+            valor = str(box)[26:31].replace(",", ".")
+            return round(float(valor), 2)
+        return None
+    except:
+        return None
+def obtener_fecha_actual(isin):
+    try:
+        if isin == "IE00BYX5NX33":
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
+        elif isin == "LU1213836080":
+            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
+        else:
+            return None
+
+        result = requests.get(website)
+        content = result.text
+        soup = BeautifulSoup(content, 'lxml')
+        box = soup.find('td', class_='line heading')
+        if box:
+            valor = box.text.strip()
+            return str(box.text.strip()[3:])
+        return None
+    except:
+        return None
+
 # Enlace de Google Drive (enlace directo de descarga)
 url = 'https://drive.google.com/uc?export=download&id=18zva1x4v5UCxamu9qbV97EVA6DbZAOzb'  # Cambia este ID por el tuyo
 
@@ -119,7 +158,7 @@ precio_medio_compra = (datos['Valor Compra'] * datos['Dinero Inv.']).sum() / tot
 # Crear columnas de métricas
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric("💶 Precio actual", f"{precio_actual:.2f} €")
+    st.metric("💶 Precio actual con fecha:  "+obtener_fecha_actual(isin), f"{precio_actual:.2f} €")
 with col2:
     st.metric("📊 Precio medio compra", f"{precio_medio_compra:.2f} €")
 with col3:

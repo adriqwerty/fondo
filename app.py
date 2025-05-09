@@ -47,25 +47,7 @@ def obtener_precio_actual(isin):
     except:
         return None
 
-def obtener_fecha_actual(isin):
-    try:
-        if isin == "IE00BYX5NX33":
-            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
-        elif isin == "LU1213836080":
-            website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
-        else:
-            return None
 
-        result = requests.get(website)
-        content = result.text
-        soup = BeautifulSoup(content, 'lxml')
-        box = soup.find('td', class_='line text')
-        if box:
-            valor = str(box)[26:31].replace(",", ".")
-            return round(float(valor), 2)
-        return None
-    except:
-        return None
 def obtener_fecha_actual(isin):
     try:
         if isin == "IE00BYX5NX33":

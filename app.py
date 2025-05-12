@@ -34,6 +34,8 @@ def obtener_precio_actual(isin):
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
         elif isin == "LU0625737910":
             website = 'https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=F00000MO6Y'
+        elif isin == "ES0165243025":
+            website = 'https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=F00001LWDD'
         else:
             print("fallo")
             return None
@@ -44,8 +46,9 @@ def obtener_precio_actual(isin):
         box = soup.find('td', class_='line text')
         print(box)
         if box:
-            valor = str(box)[26:31].replace(",", ".")
-            return round(float(valor), 2)
+            valor = box.text.strip().replace(",", ".")
+            print(valor[4:])
+            return round(float(valor[4:]), 2)
         return None
     except:
         return None
@@ -59,6 +62,8 @@ def obtener_fecha_actual(isin):
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
         elif isin == "LU0625737910":
             website = 'https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=F00000MO6Y'
+        elif isin == "ES0165243025":
+            website = 'https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=F00001LWDD'
         else:
             return None
 
@@ -110,7 +115,8 @@ datos['Fecha'] = datos['Fecha'].dt.strftime('%d/%m/%Y')
 isin_map = {
     "MSCI World": "IE00BYX5NX33",
     "Global Technology": "LU1213836080",
-    "Pictet China": "LU0625737910"
+    "Pictet China": "LU0625737910",
+    "MyInvestor Value":"ES0165243025"
 }
 isin = isin_map.get(fondo_seleccionado.strip(), None)
 precio_actual = obtener_precio_actual(isin) if isin else None

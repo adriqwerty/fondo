@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -33,13 +32,17 @@ def obtener_precio_actual(isin):
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
         elif isin == "LU1213836080":
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
+        elif isin == "LU0625737910":
+            website = 'https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=F00000MO6Y'
         else:
+            print("fallo")
             return None
 
         result = requests.get(website)
         content = result.text
         soup = BeautifulSoup(content, 'lxml')
         box = soup.find('td', class_='line text')
+        print(box)
         if box:
             valor = str(box)[26:31].replace(",", ".")
             return round(float(valor), 2)
@@ -54,6 +57,8 @@ def obtener_fecha_actual(isin):
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E'
         elif isin == "LU1213836080":
             website = 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA'
+        elif isin == "LU0625737910":
+            website = 'https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=F00000MO6Y'
         else:
             return None
 
@@ -61,6 +66,7 @@ def obtener_fecha_actual(isin):
         content = result.text
         soup = BeautifulSoup(content, 'lxml')
         box = soup.find('td', class_='line heading')
+        print(box)
         if box:
             valor = box.text.strip()
             return str(box.text.strip()[3:])
@@ -103,7 +109,8 @@ datos['Fecha'] = datos['Fecha'].dt.strftime('%d/%m/%Y')
 # Asignar ISIN
 isin_map = {
     "MSCI World": "IE00BYX5NX33",
-    "Global Technology": "LU1213836080"
+    "Global Technology": "LU1213836080",
+    "Pictet China": "LU0625737910"
 }
 isin = isin_map.get(fondo_seleccionado.strip(), None)
 precio_actual = obtener_precio_actual(isin) if isin else None
@@ -132,21 +139,35 @@ datos['Rendimiento (%)'] = datos['Rendimiento (%)'].fillna('-')
 
 # Calcular el precio medio de compra ponderado
 total_invertido = datos['Dinero Inv.'].sum()
-valor_estimado_total = datos['Valor Actual Estimado'].sum()
+valor_estimado_total = datos['Valor Actual Estimado'].sum() if 'Valor Actual Estimado' in datos.columns else 0
 
 # Calcular el precio medio de compra ponderado
 precio_medio_compra = (datos['Valor Compra'] * datos['Dinero Inv.']).sum() / total_invertido
 
+fecha = obtener_fecha_actual(isin)
+if fecha is None:
+    fecha = ""
 # Crear columnas de métricas
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    st.metric("💶 Precio actual con fecha:  "+obtener_fecha_actual(isin), f"{precio_actual:.2f} €")
+    if precio_actual is not None:
+        fecha = obtener_fecha_actual(isin)
+        texto_fecha = f"💶 Precio actual con fecha: {fecha}" if fecha else "💶 Precio actual"
+        st.metric(texto_fecha, f"{precio_actual:.2f} €")
+    else:
+        st.metric("💶 Precio actual", "No disponible")
 with col2:
     st.metric("📊 Precio medio compra", f"{precio_medio_compra:.2f} €")
 with col3:
     st.metric("📥 Total aportado", f"{total_invertido:.2f} €")
 with col4:
     st.metric("📌 Valor estimado", f"{valor_estimado_total:.2f} €")
+with col5:
+    if total_invertido != 0:
+        porcentaje = ((valor_estimado_total - total_invertido) / total_invertido) * 100
+        st.metric("📈 Rendimiento total (%)", f"{porcentaje:.2f} %")
+    else:
+        st.metric("📈 Rendimiento total (%)", "N/A")
 
 # Mostrar tabla con solo las columnas deseadas
 st.subheader("🔍 Datos del fondo seleccionado")

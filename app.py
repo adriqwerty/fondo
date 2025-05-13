@@ -5,6 +5,8 @@ from io import BytesIO
 from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 import plotly.express as px
+import re
+from datetime import datetime
 
 # Configuración de página
 st.set_page_config(page_title="Fondos de Inversión", layout="wide", initial_sidebar_state="collapsed")
@@ -26,7 +28,14 @@ st.markdown("""
 
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 36px;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 20px;'>Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.</h1>", unsafe_allow_html=True)
-
+def obtener_url_alternativa(isin):
+    urls = {
+        "IE00BYX5NX33": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE00BYX5NX33:EUR",
+        "LU1213836080": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1213836080:EUR",
+        "LU0625737910": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0625737910:EUR",
+        "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR"
+    }
+    return urls.get(isin)
 def obtener_url_morningstar(isin):
     urls = {
         "IE00BYX5NX33": 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E',
@@ -35,9 +44,21 @@ def obtener_url_morningstar(isin):
         "ES0165243025": 'https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=F00001LWDD'
     }
     return urls.get(isin)
+def obtener_precio_y_fecha_alt(isin):
+    website = obtener_url_alternativa(isin)
+    if not website:
+        return None, None
+    result = requests.get(website)
+    soup = BeautifulSoup(result.text, 'lxml')
+    precio_box = soup.find('span', class_='mod-ui-data-list__value')
+    precio=float(precio_box.text.strip())
+    fecha_box = soup.find('div', class_='mod-disclaimer')
+    match = re.search(r'as of ([A-Za-z]+ \d{1,2} \d{4})', fecha_box.text.strip())
+    fecha_str = match.group(1)
+    fecha_obj = datetime.strptime(fecha_str, "%b %d %Y")
+    return round(precio, 2) if precio else None, fecha_obj
 
-@st.cache_data(ttl=3600)
-def obtener_precio_y_fecha(isin):
+def obtener_precio_y_fecha_mor(isin):
     website = obtener_url_morningstar(isin)
     if not website:
         return None, None
@@ -47,7 +68,22 @@ def obtener_precio_y_fecha(isin):
     fecha_box = soup.find('td', class_='line heading')
     precio = float(precio_box.text.strip()[4:].replace(",", ".")) if precio_box else None
     fecha = fecha_box.text.strip()[3:] if fecha_box else None
+    fecha=datetime.strptime(fecha, "%d/%m/%Y")
     return round(precio, 2) if precio else None, fecha
+
+@st.cache_data(ttl=3600)
+def obtener_precio_y_fecha(isin):
+    precio1,fecha1=obtener_precio_y_fecha_mor(isin)
+    precio2,fecha2=obtener_precio_y_fecha_alt(isin)
+    if fecha1>fecha2:
+        precio_fin=precio1
+        fecha_fin=fecha1
+    else:
+        precio_fin=precio2
+        fecha_fin=fecha2
+    return precio_fin, fecha_fin
+
+
 
 # Enlace de Google Drive (enlace directo de descarga)
 url = 'https://drive.google.com/uc?export=download&id=18zva1x4v5UCxamu9qbV97EVA6DbZAOzb'  # Cambia este ID por el tuyo
@@ -133,6 +169,9 @@ if opcion_seleccionada == "Fondo Individual":
 
     if fecha is None:
         fecha = ""
+    else:
+        fecha_fin=fecha.date()
+        fecha=fecha_fin.strftime("%d de %B de %Y")
     # Crear columnas de métricas
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:

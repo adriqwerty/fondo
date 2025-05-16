@@ -173,7 +173,7 @@ if opcion_seleccionada == "Fondo Individual":
         fecha_fin=fecha.date()
         fecha=fecha_fin.strftime("%d de %B de %Y")
     # Crear columnas de métricas
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
     with col1:
         if precio_actual is not None:
             texto_fecha = f"💶 Precio actual con fecha: {fecha}" if fecha else "💶 Precio actual"
@@ -185,8 +185,10 @@ if opcion_seleccionada == "Fondo Individual":
     with col3:
         st.metric("📥 Total aportado", f"{total_invertido:.2f} €")
     with col4:
-        st.metric("📌 Valor estimado", f"{valor_estimado_total:.2f} €")
+        st.metric("💸 Valor estimado", f"{valor_estimado_total:.2f} €")
     with col5:
+        st.metric("📌 Diferencia", f"{valor_estimado_total-total_invertido:.2f} €")
+    with col6:
         if total_invertido != 0:
             porcentaje = ((valor_estimado_total - total_invertido) / total_invertido) * 100
             st.metric("📈 Rendimiento total (%)", f"{porcentaje:.2f} %")
@@ -366,11 +368,11 @@ elif opcion_seleccionada == "Total de la Inversión":
     if fecha_ult_actualizacion:
         st.caption(f"🕒 Última actualización de precios: {fecha_ult_actualizacion}")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("📥 Total Invertido", f"{total_invertido:.2f} €")
     col2.metric("📌 Valor Estimado", f"{total_estimado:.2f} €")
-    col3.metric("📈 Rendimiento Total", f"{rendimiento_total:.2f} %")
-
+    col3.metric("📌 Diferencia", f"{total_estimado-total_invertido:.2f} €")
+    col4.metric("📈 Rendimiento Total", f"{rendimiento_total:.2f} %")
     # Tabla resumen
     st.subheader("📊 Detalle por Fondo")
 

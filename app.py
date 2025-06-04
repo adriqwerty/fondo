@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Fondos de Inversión2", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -73,15 +73,21 @@ def obtener_precio_y_fecha_mor(isin):
 
 @st.cache_data(ttl=3600)
 def obtener_precio_y_fecha(isin):
-    precio1,fecha1=obtener_precio_y_fecha_alt(isin)
-    precio2,fecha2=obtener_precio_y_fecha_alt(isin)
-    if fecha1>fecha2:
-        precio_fin=precio1
-        fecha_fin=fecha1
+    precio1, fecha1 = obtener_precio_y_fecha_mor(isin)
+    precio2, fecha2 = obtener_precio_y_fecha_alt(isin)
+
+    # Casos posibles:
+    if fecha1 and fecha2:
+        if fecha1 > fecha2:
+            return precio1, fecha1
+        else:
+            return precio2, fecha2
+    elif fecha1:
+        return precio1, fecha1
+    elif fecha2:
+        return precio2, fecha2
     else:
-        precio_fin=precio2
-        fecha_fin=fecha2
-    return precio_fin, fecha_fin
+        return None, None
 
 
 

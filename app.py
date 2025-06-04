@@ -73,7 +73,7 @@ def obtener_precio_y_fecha_mor(isin):
 
 @st.cache_data(ttl=3600)
 def obtener_precio_y_fecha(isin):
-    precio1,fecha1=obtener_precio_y_fecha_mor(isin)
+    precio1,fecha1=obtener_precio_y_fecha_alt(isin)
     precio2,fecha2=obtener_precio_y_fecha_alt(isin)
     if fecha1>fecha2:
         precio_fin=precio1

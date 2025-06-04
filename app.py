@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión3", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Fondos de Inversión", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>

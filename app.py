@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión2", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Fondos de Inversión3", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -62,14 +62,35 @@ def obtener_precio_y_fecha_mor(isin):
     website = obtener_url_morningstar(isin)
     if not website:
         return None, None
-    result = requests.get(website)
-    soup = BeautifulSoup(result.text, 'lxml')
-    precio_box = soup.find('td', class_='line text')
-    fecha_box = soup.find('td', class_='line heading')
-    precio = float(precio_box.text.strip()[4:].replace(",", ".")) if precio_box else None
-    fecha = fecha_box.text.strip()[3:] if fecha_box else None
-    fecha=datetime.strptime(fecha, "%d/%m/%Y")
-    return round(precio, 2) if precio else None, fecha
+    try:
+        result = requests.get(website)
+        soup = BeautifulSoup(result.text, 'lxml')
+        precio_box = soup.find('td', class_='line text')
+        fecha_box = soup.find('td', class_='line heading')
+
+        if not precio_box or not fecha_box:
+            return None, None
+
+        # Obtener precio
+        precio_texto = precio_box.text.strip()
+        # Extraer el número final (normalmente viene como "EUR 123.45")
+        match_precio = re.search(r"(\d+,\d+|\d+\.\d+)$", precio_texto)
+        if not match_precio:
+            return None, None
+        precio = float(match_precio.group(1).replace(",", "."))
+
+        # Obtener fecha
+        fecha_texto = fecha_box.text.strip()
+        # Extraer fechas válidas (día entre 1 y 31)
+        match_fecha = re.search(r"\b([1-9]|[12][0-9]|3[01])/([01][0-9])/(\d{4})\b", fecha_texto)
+        if not match_fecha:
+            return None, None
+        fecha = datetime.strptime(match_fecha.group(0), "%d/%m/%Y")
+
+        return round(precio, 2), fecha
+    except Exception as e:
+        print(f"Error mor ({isin}): {e}")
+        return None, None
 
 @st.cache_data(ttl=3600)
 def obtener_precio_y_fecha(isin):

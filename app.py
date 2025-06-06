@@ -57,7 +57,6 @@ def obtener_precio_y_fecha_alt(isin):
     fecha_str = match.group(1)
     fecha_obj = datetime.strptime(fecha_str, "%b %d %Y")
     return round(precio, 2) if precio else None, fecha_obj
-
 def obtener_precio_y_fecha_mor(isin):
     website = obtener_url_morningstar(isin)
     if not website:
@@ -91,7 +90,6 @@ def obtener_precio_y_fecha_mor(isin):
     except Exception as e:
         print(f"Error mor ({isin}): {e}")
         return None, None
-
 @st.cache_data(ttl=3600)
 def obtener_precio_y_fecha(isin):
     precio1, fecha1 = obtener_precio_y_fecha_mor(isin)
@@ -109,8 +107,6 @@ def obtener_precio_y_fecha(isin):
         return precio2, fecha2
     else:
         return None, None
-
-
 
 # Enlace de Google Drive (enlace directo de descarga)
 url = 'https://drive.google.com/uc?export=download&id=18zva1x4v5UCxamu9qbV97EVA6DbZAOzb'  # Cambia este ID por el tuyo
@@ -178,10 +174,12 @@ if opcion_seleccionada == "Fondo Individual":
         
         # Calcular el valor actual de cada aportación
         datos['Valor Actual'] = (datos['Dinero Inv.'] / datos['Valor Compra']) * precio_actual
+        datos['Diferencia'] = datos['Valor Actual']-datos['Dinero Inv.'] 
     else:
         datos['Estimación Acumulada'] = None
         datos['Rendimiento (%)'] = None
         datos['Valor Actual'] = None
+        datos['Diferencia'] = None
 
     # Llenar los NaN o None antes de mostrar
     datos['Valor Actual'] = datos['Valor Actual'].fillna('-')
@@ -255,16 +253,18 @@ if opcion_seleccionada == "Fondo Individual":
         return f'color: {color}'
 
     # Columnas a mostrar
-    columnas_mostrar = ['Fecha', 'Valor Compra', 'Dinero Inv.', 'Valor Actual', 'Rendimiento (%)']
+    columnas_mostrar = ['Fecha', 'Valor Compra', 'Dinero Inv.', 'Valor Actual','Diferencia', 'Rendimiento (%)']
 
     # Crear objeto Styler solo si hay datos de rendimiento válidos
     if datos['Rendimiento (%)'].ne('-').any():
         styled_df = datos[columnas_mostrar].style \
             .applymap(color_rendimiento, subset=['Rendimiento (%)']) \
+            .applymap(color_rendimiento, subset=['Diferencia']) \
             .format({
                 'Valor Compra': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Dinero Inv.': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Valor Actual': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+                'Diferencia': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Rendimiento (%)': lambda x: formato_decimal_con_simbolos(x, tipo='porcentaje'),
             }) \
             .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
@@ -274,6 +274,7 @@ if opcion_seleccionada == "Fondo Individual":
                 'Valor Compra': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Dinero Inv.': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Valor Actual': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
+                'Diferencia': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Rendimiento (%)': lambda x: formato_decimal_con_simbolos(x, tipo='porcentaje'),
             }) \
             .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
@@ -437,7 +438,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         precio_actual_fondo, _ = obtener_precio_y_fecha(isin_fondo)
         if precio_actual_fondo:
             resumen_total.loc[resumen_total['Fondo'] == fondo, 'Precio Actual'] = precio_actual_fondo
-
+    resumen_total = resumen_total.sort_values(by='Dinero Inv.', ascending=False)
     # Añadir las nuevas métricas a la tabla resumen
     styled_resumen = resumen_total.style \
         .applymap(color_total, subset=['Rendimiento (%)']) \
@@ -473,7 +474,7 @@ elif opcion_seleccionada == "Total de la Inversión":
     fig_acum = px.line(df_acumulado, x='Fecha',
                        y=['Dinero Inv.', 'Valor Actual Estimado'],
                        labels={'value': '€', 'variable': 'Indicador'},
-                       title='📈 Evolución Acumulada: Inversión vs Valor Actual')
+                       title=' ')
 
     fig_acum.update_layout(
         template="plotly_dark",
@@ -482,5 +483,39 @@ elif opcion_seleccionada == "Total de la Inversión":
         legend_title="Indicador",
         showlegend=True
     )
-
+    st.subheader("📈 Evolución Acumulada: Inversión vs Valor Actual")
     st.plotly_chart(fig_acum, use_container_width=True)
+
+    st.subheader("🥧 Distribución de la inversión por fondo")
+    # Agrupar por fondo y sumar el dinero invertido
+    distribucion = df.groupby('Fondo')['Dinero Inv.'].sum().reset_index()
+
+    # Ordenar de mayor a menor
+    distribucion = distribucion.sort_values(by='Dinero Inv.', ascending=False)
+
+    # Crear gráfico tipo donut más estilizado
+    fig_pie = go.Figure(
+        data=[
+            go.Pie(
+                labels=distribucion['Fondo'],
+                values=distribucion['Dinero Inv.'],
+                hole=0.5,  # donut más marcado
+                textinfo='percent+label',
+                hovertemplate='%{label}<br>€%{value:,.2f} (%{percent})<extra></extra>',
+                marker=dict(colors=px.colors.sequential.RdBu, line=dict(color='white', width=2))
+            )
+        ]
+    )
+
+    fig_pie.update_layout(
+        title_text=' ',
+        title_font_size=20,
+        title_x=0.5,
+        showlegend=False,
+        margin=dict(t=60, b=0, l=0, r=0),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+    )
+
+    # Mostrar en Streamlit
+    st.plotly_chart(fig_pie, use_container_width=True)

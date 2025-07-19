@@ -32,6 +32,8 @@ def obtener_url_alternativa(isin):
     urls = {
         "IE00BYX5NX33": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE00BYX5NX33:EUR",
         "LU1213836080": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1213836080:EUR",
+        "LU1953238794": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1953238794:EUR",
+        "IE0031786696": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE0031786696:EUR",
         "LU0625737910": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0625737910:EUR",
         "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR"
     }
@@ -40,6 +42,7 @@ def obtener_url_morningstar(isin):
     urls = {
         "IE00BYX5NX33": 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00001019E',
         "LU1213836080": 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=F00000VKNA',
+        "IE0031786696": 'https://www.morningstarfunds.ie/ie/funds/snapshot/snapshot.aspx?id=0P00012I6A',
         "LU0625737910": 'https://www.morningstar.co.uk/uk/funds/snapshot/snapshot.aspx?id=F00000MO6Y',
         "ES0165243025": 'https://www.morningstar.es/es/funds/snapshot/snapshot.aspx?id=F00001LWDD'
     }
@@ -51,6 +54,9 @@ def obtener_precio_y_fecha_alt(isin):
     result = requests.get(website)
     soup = BeautifulSoup(result.text, 'lxml')
     precio_box = soup.find('span', class_='mod-ui-data-list__value')
+    if not precio_box:
+        print(f"⚠️ No se encontró el precio para {isin} en FT.")
+        return None, None
     precio=float(precio_box.text.strip())
     fecha_box = soup.find('div', class_='mod-disclaimer')
     match = re.search(r'as of ([A-Za-z]+ \d{1,2} \d{4})', fecha_box.text.strip())
@@ -137,6 +143,8 @@ opcion_seleccionada = st.sidebar.radio(
 isin_map = {
         "MSCI World": "IE00BYX5NX33",
         "Global Technology": "LU1213836080",
+        "Evercapital": "LU1953238794",
+        "Emerging Markets": "IE0031786696",
         "Pictet China": "LU0625737910",
         "MyInvestor Value":"ES0165243025"
 }

@@ -34,6 +34,9 @@ def obtener_url_alternativa(isin):
         "LU1213836080": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1213836080:EUR",
         "LU1953238794": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1953238794:EUR",
         "IE0031786696": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE0031786696:EUR",
+        "LU1694789451": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1694789451:EUR",
+        "LU1598720172": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1598720172:EUR",
+        "ES0140072028": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0140072028:EUR",
         "LU0625737910": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0625737910:EUR",
         "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR"
     }
@@ -145,6 +148,9 @@ isin_map = {
         "Global Technology": "LU1213836080",
         "Evercapital": "LU1953238794",
         "Emerging Markets": "IE0031786696",
+        "Cobas": "LU1598720172",
+        "Dunas": "LU1694789451",
+        "Abaco Renta Fija": "ES0140072028",
         "Pictet China": "LU0625737910",
         "MyInvestor Value":"ES0165243025"
 }

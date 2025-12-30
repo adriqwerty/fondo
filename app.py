@@ -140,7 +140,8 @@ df['Fecha Formateada'] = df['Fecha'].dt.strftime("%d/%m/%Y")
 
 opcion_seleccionada = st.sidebar.radio(
     "Seleccione una opción:",
-    ("Fondo Individual", "Total de la Inversión")
+    ("Fondo Individual", "Total de la Inversión"),
+    index=1
 )
 
 isin_map = {
@@ -398,6 +399,8 @@ elif opcion_seleccionada == "Total de la Inversión":
         resumen_total['Dinero Inv.']
     ) * 100
     resumen_total['Rendimiento (%)'] = resumen_total['Rendimiento (%)'].round(2)
+    resumen_total['Diferencia (€)'] = (
+    resumen_total['Valor Actual Estimado'] - resumen_total['Dinero Inv.']).round(2)
 
     # Mostrar métricas generales
     total_invertido = resumen_total['Dinero Inv.'].sum()
@@ -432,6 +435,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     resumen_total['Precio Medio Compra'] = 0.0  # Inicializar columna
     resumen_total['Precio Actual'] = 0.0  # Inicializar columna
+    resumen_total['Fecha Precio'] = ""
 
     for fondo in resumen_total['Fondo']:
         isin_fondo = isin_map.get(fondo)
@@ -449,21 +453,28 @@ elif opcion_seleccionada == "Total de la Inversión":
             resumen_total.loc[resumen_total['Fondo'] == fondo, 'Precio Medio Compra'] = precio_medio_compra_fondo
 
         # Obtener el precio actual
-        precio_actual_fondo, _ = obtener_precio_y_fecha(isin_fondo)
+        precio_actual_fondo, fecha_fondo = obtener_precio_y_fecha(isin_fondo)
         if precio_actual_fondo:
             resumen_total.loc[resumen_total['Fondo'] == fondo, 'Precio Actual'] = precio_actual_fondo
+            resumen_total.loc[resumen_total['Fondo'] == fondo,'Fecha Precio'] = fecha_fondo.strftime("%d/%m/%Y")
     resumen_total = resumen_total.sort_values(by='Dinero Inv.', ascending=False)
+    
+
     # Añadir las nuevas métricas a la tabla resumen
     styled_resumen = resumen_total.style \
-        .applymap(color_total, subset=['Rendimiento (%)']) \
+        .applymap(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
         .format({
             'Dinero Inv.': lambda x: f"{x:.2f} €",
             'Valor Actual Estimado': lambda x: f"{x:.2f} €",
             'Rendimiento (%)': lambda x: f"{x:.2f} %",
-            'Precio Medio Compra': lambda x: f"{x:.2f} €",  # Añadir formato para el precio medio de compra
-            'Precio Actual': lambda x: f"{x:.2f} €",  # Añadir formato para el precio actual
+            'Diferencia (€)': lambda x: f"{x:.2f} €",
+            'Precio Medio Compra': lambda x: f"{x:.2f} €",
+            'Precio Actual': lambda x: f"{x:.2f} €",
+            'Fecha Precio': lambda x: x
         }) \
         .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
+
+
 
     # Mostrar la tabla
     st.dataframe(styled_resumen, use_container_width=True, hide_index=True)

@@ -9,7 +9,7 @@ import re
 from datetime import datetime
 
 # Configuración de página
-st.set_page_config(page_title="Fondos de Inversión", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Fondos de Inversión2", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -544,3 +544,4 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
+

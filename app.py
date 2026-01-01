@@ -555,28 +555,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
 
 
-# Crear copia formateada de resumen_total para exportar
-resumen_export = resumen_total.copy()
 
-# Aplicar formato de euros con coma decimal
-resumen_export['Dinero Inv.'] = resumen_export['Dinero Inv.'].apply(formato_euro_es)
-resumen_export['Valor Actual Estimado'] = resumen_export['Valor Actual Estimado'].apply(formato_euro_es)
-resumen_export['Diferencia (€)'] = resumen_export['Diferencia (€)'].apply(formato_euro_es)
-resumen_export['Precio Medio Compra'] = resumen_export['Precio Medio Compra'].apply(formato_euro_es)
-resumen_export['Precio Actual'] = resumen_export['Precio Actual'].apply(formato_euro_es)
-resumen_export['Rendimiento (%)'] = resumen_export['Rendimiento (%)'].apply(lambda x: f"{x:,.2f} %".replace(",", "X").replace(".", ",").replace("X", "."))
-
-# Botón de descarga
-buffer = io.BytesIO()
-resumen_export.to_excel(buffer, index=False)
-buffer.seek(0)
-
-st.download_button(
-    label="📥 Descargar resumen mensual",
-    data=buffer,
-    file_name=f"resumen_inversion_{datetime.now().strftime('%Y_%m')}.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
 
 
 

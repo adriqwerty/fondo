@@ -38,6 +38,7 @@ def obtener_url_alternativa(isin):
         "LU1598720172": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1598720172:EUR",
         "ES0140072028": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0140072028:EUR",
         "LU0625737910": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0625737910:EUR",
+        "LU3038481936": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU3038481936:EUR",
         "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR"
     }
     return urls.get(isin)
@@ -153,6 +154,7 @@ isin_map = {
         "Dunas": "LU1694789451",
         "Abaco Renta Fija": "ES0140072028",
         "Pictet China": "LU0625737910",
+        "Hamco": "LU3038481936",
         "MyInvestor Value":"ES0165243025"
 }
 
@@ -544,5 +546,6 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 

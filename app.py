@@ -28,6 +28,12 @@ st.markdown("""
 
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 36px;'>💼 Evolución de la Inversión</h1>", unsafe_allow_html=True)
 st.markdown("<h1 style='text-align: center; color: #2c3e50; font-size: 20px;'>Consulta la evolución de tus fondos y visualiza el rendimiento acumulado con estimaciones actualizadas.</h1>", unsafe_allow_html=True)
+
+def formato_euro_es(x):
+    if isinstance(x, (int, float)):
+        return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " €"
+    return x
+
 def obtener_url_alternativa(isin):
     urls = {
         "IE00BYX5NX33": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE00BYX5NX33:EUR",
@@ -467,7 +473,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         .applymap(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
         .format({
             'Dinero Inv.': lambda x: f"{x:.2f} €",
-            'Valor Actual Estimado': lambda x: f"{x:.2f} €",
+            'Valor Actual Estimado': : formato_euro_es,
             'Rendimiento (%)': lambda x: f"{x:.2f} %",
             'Diferencia (€)': lambda x: f"{x:.2f} €",
             'Precio Medio Compra': lambda x: f"{x:.2f} €",
@@ -546,6 +552,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 
 

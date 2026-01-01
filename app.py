@@ -472,16 +472,15 @@ elif opcion_seleccionada == "Total de la Inversión":
     styled_resumen = resumen_total.style \
         .applymap(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
         .format({
-            'Dinero Inv.': lambda x: f"{x:.2f} €",
-            'Valor Actual Estimado' : formato_euro_es,
-            'Rendimiento (%)': lambda x: f"{x:.2f} %",
-            'Diferencia (€)': lambda x: f"{x:.2f} €",
-            'Precio Medio Compra': lambda x: f"{x:.2f} €",
-            'Precio Actual': lambda x: f"{x:.2f} €",
+            'Dinero Inv.': formato_euro_es,
+            'Valor Actual Estimado': formato_euro_es,
+            'Diferencia (€)': formato_euro_es,
+            'Precio Medio Compra': formato_euro_es,
+            'Precio Actual': formato_euro_es,
+            'Rendimiento (%)': lambda x: f"{x:.2f}".replace(".", ",") + " %",
             'Fecha Precio': lambda x: x
         }) \
         .set_properties(**{'text-align': 'center', 'font-weight': 'bold'})
-
 
 
     # Mostrar la tabla
@@ -552,6 +551,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 
 

@@ -473,7 +473,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         .applymap(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
         .format({
             'Dinero Inv.': lambda x: f"{x:.2f} €",
-            'Valor Actual Estimado': : formato_euro_es,
+            'Valor Actual Estimado' : formato_euro_es,
             'Rendimiento (%)': lambda x: f"{x:.2f} %",
             'Diferencia (€)': lambda x: f"{x:.2f} €",
             'Precio Medio Compra': lambda x: f"{x:.2f} €",
@@ -552,6 +552,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
+
 
 
 

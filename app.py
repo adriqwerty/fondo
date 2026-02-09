@@ -466,7 +466,28 @@ elif opcion_seleccionada == "Total de la Inversión":
         if precio_actual_fondo:
             resumen_total.loc[resumen_total['Fondo'] == fondo, 'Precio Actual'] = precio_actual_fondo
             resumen_total.loc[resumen_total['Fondo'] == fondo,'Fecha Precio'] = fecha_fondo.strftime("%d/%m/%Y")
-    resumen_total = resumen_total.sort_values(by='Dinero Inv.', ascending=False)
+    orden_fondos = [
+    "MSCI World",
+    "Abaco Renta Fija",
+    "Cobas",
+    "Dunas",
+    "Evercapital",
+    "MyInvestor Value",
+    "Hamco",
+    "Emerging Markets",
+    "Pictet China"
+    ]
+
+    resumen_total['Fondo'] = pd.Categorical(
+    resumen_total['Fondo'],
+    categories=orden_fondos,
+    ordered=True
+    )
+
+    resumen_total = resumen_total.sort_values('Fondo')
+
+
+    #resumen_total = resumen_total.sort_values(by='Dinero Inv.', ascending=False)
     
 
     # Añadir las nuevas métricas a la tabla resumen
@@ -553,7 +574,82 @@ elif opcion_seleccionada == "Total de la Inversión":
     # Mostrar en Streamlit
     st.plotly_chart(fig_pie, use_container_width=True)
 
+    # Crear diccionario de precios actuales por fondo
+    precios_actuales = {}
 
+    for fondo, isin in isin_map.items():
+        try:
+            precio, _ = obtener_precio_y_fecha(isin)
+            if precio:
+                precios_actuales[fondo] = precio
+        except:
+            precios_actuales[fondo] = None
+
+   # ================== CALCULO DE VALOR ACTUAL POR APORTACIÓN ==================
+
+    # Mapear precio actual a cada fila
+    df['Precio Actual'] = df['Fondo'].map(precios_actuales)
+
+    # Evitar divisiones por 0 o NaN
+    df = df[df['Valor Compra'] > 0]
+
+    # Si algún fondo no tiene precio actual, usar precio de compra
+    df['Precio Actual'] = df['Precio Actual'].fillna(df['Valor Compra'])
+
+    # Calcular valor actual de cada aportación
+    df['Valor Actual Aportación'] = (df['Dinero Inv.'] / df['Valor Compra']) * df['Precio Actual']
+
+    # Rentabilidad %
+    df['Rentabilidad %'] = ((df['Valor Actual Aportación'] - df['Dinero Inv.']) / df['Dinero Inv.']) * 100
+
+    # Beneficio en €
+    df['Beneficio €'] = df['Valor Actual Aportación'] - df['Dinero Inv.']
+
+
+    # ================== HISTORIAL COMPLETO DE APORTACIONES ==================
+
+    st.subheader("📋 Historial completo de aportaciones")
+
+    df_aportaciones = df.copy()
+    df_aportaciones['Fecha'] = pd.to_datetime(df_aportaciones['Fecha'])
+    df_aportaciones = df_aportaciones.sort_values('Fecha', ascending=False)
+    df_aportaciones['Fecha'] = df_aportaciones['Fecha'].dt.strftime("%d/%m/%Y")
+
+
+    # ================== COLORES ==================
+
+    def color_rentabilidad(val):
+        try:
+            val = float(val)
+            if val > 0:
+                return "color: #27ae60; font-weight: bold"   # verde
+            elif val < 0:
+                return "color: #c0392b; font-weight: bold"   # rojo
+        except:
+            pass
+        return "color: black"
+
+
+    # ================== TABLA FINAL ==================
+
+    tabla_aportaciones = df_aportaciones[['Fecha', 'Fondo', 'Dinero Inv.', 'Valor Compra',
+                                          'Precio Actual', 'Valor Actual Aportación',
+                                          'Beneficio €', 'Rentabilidad %']]
+
+    st.dataframe(
+        tabla_aportaciones.style
+        .format({
+            'Dinero Inv.': "{:,.2f} €",
+            'Valor Compra': "{:,.2f}",
+            'Precio Actual': "{:,.2f}",
+            'Valor Actual Aportación': "{:,.2f} €",
+            'Beneficio €': "{:,.2f} €",
+            'Rentabilidad %': "{:.2f} %"
+        })
+        .applymap(color_rentabilidad, subset=['Rentabilidad %', 'Beneficio €']),
+        use_container_width=True,
+        hide_index=True
+    )
 
 
 

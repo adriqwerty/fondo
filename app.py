@@ -533,7 +533,7 @@ elif opcion_seleccionada == "Total de la Inversión":
                                  labels={'Rendimiento (%)': 'Rendimiento (%)'},
                                  title="📊 Rendimiento por Fondo",
                                  template="plotly_dark",  # Estilo oscuro para un diseño más moderno
-                                 height=altura_tabla  # Mejorar el tamaño del gráfico
+                                 height=altura_tabla ) # Mejorar el tamaño del gráfico
                             
 
     # Asegurar formato datetime
@@ -669,6 +669,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

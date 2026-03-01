@@ -73,7 +73,7 @@ def obtener_precio_y_fecha_alt(isin):
     if not precio_box:
         print(f"⚠️ No se encontró el precio para {isin} en FT.")
         return None, None
-    precio_str = precio_str.strip()
+    precio_str = precio_box.text.strip()
     precio_str = precio_str.replace(',', '')  # elimina separador de miles
     precio = float(precio_str)
     #precio=float(precio_box.text.strip())
@@ -663,6 +663,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

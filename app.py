@@ -532,9 +532,9 @@ elif opcion_seleccionada == "Total de la Inversión":
                                  color_continuous_scale='Viridis',  # Escala de colores atractiva
                                  labels={'Rendimiento (%)': 'Rendimiento (%)'},
                                  title="📊 Rendimiento por Fondo",
-                                 template="plotly_dark"  # Estilo oscuro para un diseño más moderno
-                                 #height=500)  # Mejorar el tamaño del gráfico
-                            )
+                                 template="plotly_dark",  # Estilo oscuro para un diseño más moderno
+                                 height=800)  # Mejorar el tamaño del gráfico
+                            
 
     # Asegurar formato datetime
     df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
@@ -669,6 +669,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

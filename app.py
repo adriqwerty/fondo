@@ -524,7 +524,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     altura_tabla = 45 * len(resumen_total) + 60
     # Mostrar la tabla
-    st.dataframe(styled_resumen, use_container_width=True, hide_index=True)
+    st.dataframe(styled_resumen, use_container_width=True, hide_index=True,height=altura_tabla )
     fig_rendimiento = px.bar(resumen_total,
                                  x='Fondo',
                                  y='Rendimiento (%)',
@@ -533,7 +533,7 @@ elif opcion_seleccionada == "Total de la Inversión":
                                  labels={'Rendimiento (%)': 'Rendimiento (%)'},
                                  title="📊 Rendimiento por Fondo",
                                  template="plotly_dark",  # Estilo oscuro para un diseño más moderno
-                                 height=altura_tabla ) # Mejorar el tamaño del gráfico
+                                 height=800) # Mejorar el tamaño del gráfico
                             
 
     # Asegurar formato datetime
@@ -669,6 +669,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

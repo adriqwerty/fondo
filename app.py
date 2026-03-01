@@ -46,7 +46,12 @@ def obtener_url_alternativa(isin):
         "ES0140072028": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0140072028:EUR",
         "LU0625737910": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0625737910:EUR",
         "LU3038481936": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU3038481936:EUR",
-        "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR"
+        "ES0165243025": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0165243025:EUR",
+        "IE00BH6XSF26": "https://markets.ft.com/data/funds/tearsheet/historical?s=IE00BH6XSF26:EUR",
+        "ES0112611001": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0112611001:EUR",
+        "ES0116567035": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0116567035:EUR",
+        "LU1112771503": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1112771503:EUR",
+        "ES0146309002": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0146309002:EUR"
     }
     return urls.get(isin)
 def obtener_url_morningstar(isin):
@@ -162,7 +167,12 @@ isin_map = {
         "Abaco Renta Fija": "ES0140072028",
         "Pictet China": "LU0625737910",
         "Hamco": "LU3038481936",
-        "MyInvestor Value":"ES0165243025"
+        "MyInvestor Value":"ES0165243025",
+        "Heptagon": "IE00BH6XSF26",
+        "AZValor": "ES0112611001",
+        "CartesioX": "ES0116567035",
+        "Helium": "LU1112771503",
+        "Horos": "ES0146309002"
 }
 
 
@@ -650,6 +660,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

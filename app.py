@@ -492,7 +492,7 @@ elif opcion_seleccionada == "Total de la Inversión":
     "Evercapital",
     "Abaco Renta Fija",
     "Dunas",
-    "Helium,
+    "Helium",
     "CartesioX"
     ]
 
@@ -668,6 +668,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

@@ -481,14 +481,19 @@ elif opcion_seleccionada == "Total de la Inversión":
             resumen_total.loc[resumen_total['Fondo'] == fondo,'Fecha Precio'] = fecha_fondo.strftime("%d/%m/%Y")
     orden_fondos = [
     "MSCI World",
-    "Abaco Renta Fija",
     "Cobas",
-    "Dunas",
-    "Evercapital",
-    "MyInvestor Value",
+    "Horos",
+    "AZValor",
     "Hamco",
+    "Heptagon",
     "Emerging Markets",
-    "Pictet China"
+    "Pictet China",
+    "MyInvestor Value",
+    "Evercapital",
+    "Abaco Renta Fija",
+    "Dunas",
+    "Helium,
+    "CartesioX"
     ]
 
     resumen_total['Fondo'] = pd.Categorical(
@@ -663,6 +668,7 @@ elif opcion_seleccionada == "Total de la Inversión":
         use_container_width=True,
         hide_index=True
     )
+
 
 
 

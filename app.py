@@ -295,8 +295,8 @@ if opcion_seleccionada == "Fondo Individual":
     # Crear objeto Styler solo si hay datos de rendimiento válidos
     if datos['Rendimiento (%)'].ne('-').any():
         styled_df = datos[columnas_mostrar].style \
-            .applymap(color_rendimiento, subset=['Rendimiento (%)']) \
-            .applymap(color_rendimiento, subset=['Diferencia']) \
+            .map(color_rendimiento, subset=['Rendimiento (%)']) \
+            .map(color_rendimiento, subset=['Diferencia']) \
             .format({
                 'Valor Compra': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
                 'Dinero Inv.': lambda x: formato_decimal_con_simbolos(x, tipo='euro'),
@@ -510,7 +510,7 @@ elif opcion_seleccionada == "Total de la Inversión":
 
     # Añadir las nuevas métricas a la tabla resumen
     styled_resumen = resumen_total.style \
-        .applymap(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
+        .map(color_total, subset=['Rendimiento (%)', 'Diferencia (€)']) \
         .format({
             'Dinero Inv.': formato_euro_es,
             'Valor Actual Estimado': formato_euro_es,
@@ -666,7 +666,7 @@ elif opcion_seleccionada == "Total de la Inversión":
             'Beneficio €': "{:,.2f} €",
             'Rentabilidad %': "{:.2f} %"
         })
-        .applymap(color_rentabilidad, subset=['Rentabilidad %', 'Beneficio €']),
+        .map(color_rentabilidad, subset=['Rentabilidad %', 'Beneficio €']),
         use_container_width=True,
         hide_index=True
     )

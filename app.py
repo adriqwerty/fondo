@@ -51,6 +51,8 @@ def obtener_url_alternativa(isin):
         "ES0112611001": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0112611001:EUR",
         "ES0116567035": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0116567035:EUR",
         "LU1112771503": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1112771503:EUR",
+        "ES0140794001": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0140794001:EUR",
+        "LU0840158819": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0840158819:EUR",
         "ES0146309002": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0146309002:EUR"
     }
     return urls.get(isin)
@@ -175,7 +177,9 @@ isin_map = {
         "AZValor": "ES0112611001",
         "CartesioX": "ES0116567035",
         "Helium": "LU1112771503",
-        "Horos": "ES0146309002"
+        "Horos": "ES0146309002",
+        "Gamma Global FI":"ES0140794001",
+        "Storm Bond II":"LU0840158819"
 }
 
 
@@ -493,7 +497,9 @@ elif opcion_seleccionada == "Total de la Inversión":
     "Abaco Renta Fija",
     "Dunas",
     "Helium",
-    "CartesioX"
+    "CartesioX",
+    "Gamma Global FI",
+    "Storm Bond II"
     ]
 
     resumen_total['Fondo'] = pd.Categorical(

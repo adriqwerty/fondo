@@ -53,6 +53,7 @@ def obtener_url_alternativa(isin):
         "LU1112771503": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU1112771503:EUR",
         "ES0140794001": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0140794001:EUR",
         "LU0840158819": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0840158819:EUR",
+        "LU0942882589": "https://markets.ft.com/data/funds/tearsheet/historical?s=LU0942882589:EUR",
         "ES0146309002": "https://markets.ft.com/data/funds/tearsheet/historical?s=ES0146309002:EUR"
     }
     return urls.get(isin)
@@ -179,6 +180,7 @@ isin_map = {
         "Helium": "LU1112771503",
         "Horos": "ES0146309002",
         "Gamma Global FI":"ES0140794001",
+        "BrightGate":"LU0942882589",
         "Storm Bond II":"LU0840158819"
 }
 
@@ -499,6 +501,7 @@ elif opcion_seleccionada == "Total de la Inversión":
     "Helium",
     "CartesioX",
     "Gamma Global FI",
+    "BrightGate",
     "Storm Bond II"
     ]
 
